@@ -17,3 +17,6 @@ $this
   ->mapPackageMethods($this('resolver')->resolveStatic(HandlebarsPackage::class))
   //use one global resolver
   ->setResolverHandler($this('resolver')->getResolverHandler());
+
+//next add helpers
+include_once __DIR__ . '/src/helpers.php';

@@ -22,7 +22,8 @@
   },
   "require": {
     "cradlephp/handlebars": "~3.0.0",
-    "cradlephp/package": "~3.0.0"
+    "cradlephp/package": "~3.0.0",
+    "erusev/parsedown": "1.7.1"
   },
   "autoload": {
     "psr-4": {
