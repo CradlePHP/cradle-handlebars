@@ -201,6 +201,27 @@ $this('handlebars')
     return number_format((float) $price, 2);
   })
 
+  /**
+   * Parses Currency
+   *
+   * @param *string $abbr
+   *
+   * @return string
+   */
+  ->registerHelper('currency', function ($abbr, $options) {
+    static $currencies = null;
+    if (!$currencies) {
+      $currencies = file_get_contents(__DIR__ . '/assets/currencies.json');
+      $currencies = json_decode($currencies, true);
+    }
+
+    if (!isset($currencies[$abbr]['symbol_native'])) {
+      return $abbr;
+    }
+
+    return $currencies[$abbr]['symbol_native'];
+  })
+
   /* i18n Helpers
   ------------------------------------------------------------------------------*/
 

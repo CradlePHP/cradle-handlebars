@@ -102,7 +102,7 @@ class HandlebarsPackage extends HandlebarsHandler
     //eg. head -> head
     //eg. post_row -> post/row
     //eg. search_post_row -> search/post/row
-    $path = str_replace('_', '/');
+    $path = str_replace('_', '/', $name);
     $last = strrpos($path, '/');
 
     // STEP 2:
@@ -121,7 +121,7 @@ class HandlebarsPackage extends HandlebarsHandler
 
     $partial = sprintf('%s/%s.%s', $this->path, $path, $extension);
 
-    return $this->registerPartialFile($name, $partial);
+    return $this->registerPartialFromFile($name, $partial);
   }
 
   /**
@@ -175,7 +175,7 @@ class HandlebarsPackage extends HandlebarsHandler
 
     //eg. product/search/detail
     $file = sprintf('%s/%s.%s', $this->path, $path, $extension);
-    return $this->renderFile($file);
+    return $this->renderFromFile($file, $data);
   }
 
   /**
