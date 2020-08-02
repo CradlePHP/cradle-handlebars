@@ -14,7 +14,7 @@ $this
   //then load the package
   ->package('handlebars')
   //map handlebars package
-  ->mapPackageMethods($this('resolver')->resolveStatic(HandlebarsPackage::class))
+  ->mapPackageMethods($this('resolver')->resolve(HandlebarsPackage::class))
   //use one global resolver
   ->setResolverHandler($this('resolver')->getResolverHandler());
 

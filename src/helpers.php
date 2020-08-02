@@ -1,6 +1,5 @@
 <?php //-->
 
-use Parsedown;
 use Cradle\Data\Registry;
 
 $this('handlebars')
@@ -202,8 +201,36 @@ $this('handlebars')
     return number_format((float) $price, 2);
   })
 
-  /* Date Helpers
+  /* i18n Helpers
   ------------------------------------------------------------------------------*/
+
+  /**
+   * Uses the config/i18n folder to determine a translation
+   *
+   * @param *string      string to translate
+   * @param string[..string] sprintf variables
+   *
+   * @return string
+   */
+  ->registerHelper('_', function ($key) {
+    $args = func_get_args();
+    $key = array_shift($args);
+    $options = array_pop($args);
+
+    $more = explode(' __ ', $options['fn']());
+
+    foreach ($more as $arg) {
+      $args[] = $arg;
+    }
+
+    foreach ($args as $i => $arg) {
+      if (is_null($arg)) {
+        $args[$i] = '';
+      }
+    }
+
+    return cradle('lang')->get((string) $key, $args);
+  })
 
   /**
    * Formats the string to date format
@@ -215,6 +242,42 @@ $this('handlebars')
    */
   ->registerHelper('date', function ($time, $format, $options) {
     return date($format, strtotime($time));
+  })
+
+  /**
+   * Formats the string to relative format
+   *
+   * @param *string
+   * @param int   if 1, uses the mini relative format
+   *
+   * @return string
+   */
+  ->registerHelper('relative', function ($date, $options) {
+    $timezone = cradle('tz');
+    $offset = $timezone->getOffset();
+    $relative = $timezone->toRelative(time() - $offset);
+
+    if (!is_array($options) && $options) {
+      $relative = strtolower($relative);
+
+      $relative = str_replace(array('from now', 'ago'), '', $relative);
+      $relative = str_replace(array('seconds', 'second'), 's', $relative);
+      $relative = str_replace(array('minutes', 'minute'), 'm', $relative);
+      $relative = str_replace(array('hours', 'hour'), 'h', $relative);
+      $relative = str_replace(array('days', 'day'), 'd', $relative);
+      $relative = str_replace(array('weeks', 'week'), 'w', $relative);
+      $relative = str_replace(array('months', 'month'), 'm', $relative);
+      $relative = str_replace(array('years', 'year'), 'y', $relative);
+      $relative = str_replace(array('yesterday', 'tomorrow'), '1d', $relative);
+
+      $relative = str_replace(' ', '', $relative);
+
+      if (!preg_match('/^[0-9]+[a-z]+$/', $relative)) {
+        return '';
+      }
+    }
+
+    return $relative;
   })
 
   /* Array Helpers
@@ -695,24 +758,26 @@ $this('handlebars')
   ------------------------------------------------------------------------------*/
 
   /**
-   * Returns the settings in config/settings.php
+   * Gives access to the current request object
    *
-   * @param *string Key in the settings file
+   * @param *string[..string] request path
    *
-   * @return mixed
+   * @return mixed|[BLOCK]
    */
-  ->registerHelper('settings', function ($key, $options) {
-    $settings = cradle('config')->get('settings');
+  ->registerHelper('config', function (...$args) {
+    $options = array_pop($args);
 
-    if (!isset($settings[$key])) {
+    $results = cradle('config')->get(...$args);
+
+    if (!$results) {
       return $options['inverse']();
     }
 
-    if (is_object($settings[$key]) || is_array($settings[$key])) {
-      return $options['fn']((array) $settings[$key]);
+    if (is_object($results) || is_array($results)) {
+      return $options['fn']((array) $results);
     }
 
-    return $settings[$key];
+    return $results;
   })
 
   /**
@@ -725,7 +790,7 @@ $this('handlebars')
   ->registerHelper('request', function (...$args) {
     $options = array_pop($args);
 
-    $results = cradle('io')->getRequest()->get(...$args);
+    $results = cradle()->getRequest()->get(...$args);
 
     if (!$results) {
       return $options['inverse']();
@@ -748,7 +813,7 @@ $this('handlebars')
   ->registerHelper('response', function (...$args) {
     $options = array_pop($args);
 
-    $results = cradle('io')->getResponse()->get(...$args);
+    $results = cradle()->getResponse()->get(...$args);
 
     if (!$results) {
       return $options['inverse']();
