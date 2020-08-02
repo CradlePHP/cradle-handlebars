@@ -250,7 +250,7 @@ $this('handlebars')
       }
     }
 
-    return cradle('lang')->get((string) $key, $args);
+    return cradle('lang')->translate((string) $key, $args);
   })
 
   /**
